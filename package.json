@@ -1,0 +1,27 @@
+{
+  "name": "unit-9-project-9-test",
+  "version": "1.0.0",
+  "description": "Rest API test",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justicetrent/unit-9-project-9-test.git"
+  },
+  "author": "Justice",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justicetrent/unit-9-project-9-test/issues"
+  },
+  "homepage": "https://github.com/justicetrent/unit-9-project-9-test#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-validator": "^6.2.0",
+    "seed": "^0.4.4",
+    "sequelize": "^5.18.1",
+    "sequelize-cli": "^5.5.1",
+    "sqlite3": "^4.1.0"
+  }
+}
