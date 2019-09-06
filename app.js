@@ -2,7 +2,7 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-// const routes = require('./routes/routes')
+const routes = require('./routes/routes')
 // const sequelize = require('sequelize')
 
 //create express app 
@@ -21,8 +21,15 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
+//Takes care of all middleware needs and gives access to req.body
+app.use(express.json())
 
-
+app.use('/api', routes)
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the REST API project',
+  })
+})
 
 
 // setup a global error handler
