@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-    const User = sequelize.define('user', {
+    const User = sequelize.define('User', {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -37,9 +37,9 @@ module.exports = (sequelize, DataTypes) => {
         }
     })
     //creates the association/relationship between two different tables 
-    user.associate = function (models) {
+    User.associate = function (models) {
         //allows the user table to have access to courses table 
-        user.hasMany(models.course)
+        User.hasMany(models.course)
     }
     return User
 }

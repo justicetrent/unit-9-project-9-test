@@ -2,8 +2,9 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-const routes = require('./routes/routes')
-const sequelize = require('sequelize')
+// const routes = require('./routes/routes')
+// const sequelize = require('sequelize')
+
 //create express app 
 const app = express();
 

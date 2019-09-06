@@ -30,12 +30,15 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true
             }
         })
-
     //Associations
     Course.associate = models => {
-        Course.belongsTo(models.user,
-            { foreignKey: 'company_id' }
-        )
-        return Course
+        Course.belongsTo(models.User, {
+            as: 'user',
+            foreignKey: {
+                fieldName: 'userId',
+                allowNull: false
+            }
+        })
     }
+    return Course
 }
