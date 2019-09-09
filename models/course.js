@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Course = sequelize.define('course',
+    const Course = sequelize.define('Courses',
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -31,16 +31,15 @@ module.exports = (sequelize, DataTypes) => {
             }
         })
     //Associations
-    // Course.associate = function (models) {
-    //     // associations can be defined here
-    //     Course.belongsTo(models.User
-            //{
-        //     as: 'user',
-        //     foreignKey: {
-        //         fieldName: 'userId',
-        //         allowNull: false,
-    //     //     },
-    //     );
-    // };
+    Course.associate = function (models) {
+        // associations can be defined here
+        Course.belongsTo(models.Users, {
+            as: 'user',
+            foreignKey: {
+                fieldName: 'userId',
+                allowNull: false,
+            },
+        })
+    }
     return Course
 }
