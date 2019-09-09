@@ -31,14 +31,16 @@ module.exports = (sequelize, DataTypes) => {
             }
         })
     //Associations
-    Course.associate = models => {
-        Course.belongsTo(models.User, {
-            as: 'user',
-            foreignKey: {
-                fieldName: 'userId',
-                allowNull: false
-            }
-        })
-    }
+    // Course.associate = function (models) {
+    //     // associations can be defined here
+    //     Course.belongsTo(models.User
+            //{
+        //     as: 'user',
+        //     foreignKey: {
+        //         fieldName: 'userId',
+        //         allowNull: false,
+    //     //     },
+    //     );
+    // };
     return Course
 }
