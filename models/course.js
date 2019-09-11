@@ -33,8 +33,8 @@ module.exports = (sequelize, DataTypes) => {
     //Associations
     Course.associate = function (models) {
         // associations can be defined here
-        Course.belongsTo(models.Users, {
-            as: 'user',
+        Course.belongsTo(models.User, {
+            as: 'User',
             foreignKey: {
                 fieldName: 'userId',
                 allowNull: false,

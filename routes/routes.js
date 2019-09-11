@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 // const data = require('../seed/data.json')
 const User = require('../models').User;
+const Courses = require('../models').Courses;
 const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth')
 // const bodyParser = require('body-parser');
@@ -63,7 +64,7 @@ const authenticateUser = async (req, res, next) => {
 }
 
 
-
+// ************************* User Routes ****************************
 router.get('/users', authenticateUser, async (req, res, ) => {
   const users = await User.findByPk(
     req.body.id,
@@ -91,6 +92,85 @@ router.post('/users', async (req, res) => {
   }
 })
 
+//*************** Coures Routes ********************* */
+
+router.get('/courses', async (req, res, ) => {
+  const courses = await Courses.findAll(
+    req.body.id,
+    {
+      // Excludes unneeded private information 
+      attributes: {
+        exclude: ['password', 'createdAt', 'updatedAt']
+      }
+    }
+  )
+  res.json(courses)
+
+});
+
+router.get('/Courses/:id', async (req, res, next) => {
+  try {
+    const courseId = await Courses.findOne({
+      where: {
+        id: req.params.id
+      },
+    })
+    if (courseId === null) {
+      res.status(404)
+      res.json('No Course found')
+    }
+    else {
+      res.json(courseId)
+    }
+  } catch (err) {
+    console.log('500: Internal Server Error')
+  }
+})
+
+// Post Route with authentication for Course titles
+
+router.post('/Courses', authenticateUser, async (req, res, next) => {
+  try {
+    if (req.body.title && req.body.description) {
+      const newCourse = await Courses.create(req.body)
+      res.location(`/api/course/${newCourse.id}`)
+      res.status(201).end()
+    } else {
+      res.status(400).end()
+    }
+
+  }
+  catch (err) {
+    console.log('Status 500: Internal Server Error')
+  }
+})
+
+// Delete course route with user authentication 
+
+router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
+  const courseDelete = await Courses.findByPk(req.params.id);
+  if (courseDelete.userId === req.body.userId) {
+    await courseDelete.destroy();
+    res.status(204).end();
+  }
+  else
+    res.status(403).end();
+})
+
+//Put course route with user authentication 
+router.put('/courses/:id', authenticateUser, async (req, res, next) => {
+  const coursePut = await Courses.findByPk(req.params.id);
+  if (coursePut.userId === req.body.userId) {
+    if (req.body.title && req.body.description) {
+      coursePut.update(req.body);
+      res.status(204).end()
+    } else {
+      res.status(400).end();
+    }
+
+  } else
+    res.status(403).end();
+})
 
 module.exports = router;
 
