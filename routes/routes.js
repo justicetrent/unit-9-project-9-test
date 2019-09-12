@@ -84,7 +84,7 @@ router.post('/users', async (req, res) => {
     res.location('/')
     res.status(201).end()
   } else {
-    res.status(401).end()
+    res.status(400).end()
   }
 })
 
@@ -152,7 +152,7 @@ router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
     } else {
       res.status(403).end();
     };
-  } 
+  }
   catch (err) {
     console.log("Forbidden: you are not the correct user")
   }
@@ -173,7 +173,8 @@ router.put('/courses/:id', authenticateUser, async (req, res, next) => {
     } else
       res.status(403).end();
   } catch (err) {
-    console.log("Forbidden: you are not the correct user")
+    console.log("Error 500 - Internal Server Error- My bad yo")
+    next(err);
   }
 })
 
