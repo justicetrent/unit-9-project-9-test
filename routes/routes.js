@@ -1,14 +1,10 @@
 // Constructing a router instance.
 const express = require('express');
 const router = express.Router();
-// const data = require('../seed/data.json')
 const User = require('../models').User;
 const Courses = require('../models').Courses;
 const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth')
-// const bodyParser = require('body-parser');
-// router.use(bodyParser.json())
-// router.use(bodyParser.urlencoded({ extended: false }))
 
 //User authentication middleware
 const authenticateUser = async (req, res, next) => {
@@ -148,28 +144,37 @@ router.post('/Courses', authenticateUser, async (req, res, next) => {
 // Delete course route with user authentication 
 
 router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
-  const courseDelete = await Courses.findByPk(req.params.id);
-  if (courseDelete.userId === req.body.userId) {
-    await courseDelete.destroy();
-    res.status(204).end();
+  try {
+    const courseDelete = await Courses.findByPk(req.params.id)
+    if (courseDelete.userId === req.body.userId) {
+      await courseDelete.destroy();
+      res.status(204).end();
+    } else {
+      res.status(403).end();
+    };
+  } 
+  catch (err) {
+    console.log("Forbidden: you are not the correct user")
   }
-  else
-    res.status(403).end();
 })
 
 //Put course route with user authentication 
 router.put('/courses/:id', authenticateUser, async (req, res, next) => {
-  const coursePut = await Courses.findByPk(req.params.id);
-  if (coursePut.userId === req.body.userId) {
-    if (req.body.title && req.body.description) {
-      coursePut.update(req.body);
-      res.status(204).end()
-    } else {
-      res.status(400).end();
-    }
+  try {
+    const courseUpdate = await Courses.findByPk(req.params.id);
+    if (courseUpdate.userId === req.body.userId) {
+      if (req.body.title && req.body.description) {
+        courseUpdate.update(req.body);
+        res.status(204).end()
+      } else {
+        res.status(400).end();
+      }
 
-  } else
-    res.status(403).end();
+    } else
+      res.status(403).end();
+  } catch (err) {
+    console.log("Forbidden: you are not the correct user")
+  }
 })
 
 module.exports = router;

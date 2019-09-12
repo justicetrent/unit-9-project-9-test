@@ -4,7 +4,7 @@ const express = require('express');
 const morgan = require('morgan');
 const routes = require('./routes/routes')
 // const sequelize = require('sequelize')
-
+const { sequelize } = require('./models')
 //create express app 
 const app = express();
 
@@ -12,6 +12,12 @@ const app = express();
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
+sequelize.authenticate().then( () => {
+  console.log(`I's connected to the database!`)
+})
+  .catch(err => {
+    console.err(`I's ain't connected to the database!`, err)
+})
 // const data = require('../seed/data.json')
 // const userData = data.user
 
