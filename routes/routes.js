@@ -91,18 +91,21 @@ router.post('/users', async (req, res) => {
 //*************** Coures Routes ********************* */
 
 router.get('/courses', async (req, res, ) => {
-  const courses = await Courses.findAll(
-    req.body.id,
-    {
-      // Excludes unneeded private information 
-      attributes: {
-        exclude: ['password', 'createdAt', 'updatedAt']
-      }
-    }
-  )
+  const courses = await Courses.findAll({
+    
+    // Excludes unneeded private information 
+    attributes: {
+      exclude: ['password', 'createdAt', 'updatedAt']
+    },
+    include: [
+      {
+        model: User,
+        as: 'User'
+      },
+    ],
+  })
   res.json(courses)
-
-});
+  });
 
 router.get('/Courses/:id', async (req, res, next) => {
   try {
@@ -110,6 +113,12 @@ router.get('/Courses/:id', async (req, res, next) => {
       where: {
         id: req.params.id
       },
+      include: [
+        {
+          model: User,
+          as: 'User'
+        },
+      ],
     })
     if (courseId === null) {
       res.status(404)

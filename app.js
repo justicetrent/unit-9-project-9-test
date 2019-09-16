@@ -13,10 +13,10 @@ const app = express();
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
 sequelize.authenticate().then( () => {
-  console.log(`I's connected to the database!`)
+  console.log(`Connected to the database`)
 })
   .catch(err => {
-    console.err(`I's ain't connected to the database!`, err)
+    console.err(`Not connected to the database`, err)
 })
 // const data = require('../seed/data.json')
 // const userData = data.user
