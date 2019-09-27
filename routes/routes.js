@@ -28,13 +28,15 @@ const authenticateUser = async (req, res, next) => {
       //If password matches
       if (authenticated) {
         console.log(`Authentication successful for user: ${user.firstName} ${user.lastName}`);
-        if (req.originalUrl.includes('courses')) {
-          //If route has a courses endpoint, set request userId to matched user id
-          req.body.userId = user.id;
-        } else if (req.originalUrl.includes('users')) {
-          //If route has a users endpoint, set request id to matched user id
-          req.body.id = user.id;
-        }
+        req.currentUser = user;
+        /*if (req.originalUrl.includes('courses')) {
+              //If route has a courses endpoint, set request userId to matched user id
+              req.body.userId = user.id;
+            } else if (req.originalUrl.includes('users')) {
+              //If route has a users endpoint, set request id to matched user id
+              req.body.id = user.id;
+            }
+        */
       } else {
         //Otherwise the Authentication failed
         message = `Authentication failed for user: ${user.firstName} ${user.lastName}`;
@@ -60,26 +62,39 @@ const authenticateUser = async (req, res, next) => {
 }
 
 
-// ************************* User Routes ****************************
-router.get('/users', authenticateUser, async (req, res, ) => {
-  const users = await User.findByPk(
-    req.body.id,
-    {
-      // Excludes unneeded private information 
-      attributes: {
-        exclude: ['password', 'createdAt', 'updatedAt']
-      }
-    }
-  )
-  res.json(users)
+router.get('/users', authenticateUser, (req, res, next) => {
+  res.status(200);
 
+  const jsonResponse = req.currentUser;
+
+  delete jsonResponse["password"];
+  delete jsonResponse["createdAt"];
+  delete jsonResponse["updatedAt"];
+
+  res.json(jsonResponse);
 });
 
-router.post('/users', async (req, res) => {
+// // ************************* User Routes ****************************
+// router.get('/users', authenticateUser, async (req, res, next) => {
+//   const users = await User.findByPk(
+//     req.body.id,
+//     {
+//       // Excludes unneeded private information 
+//       attributes: {
+//         exclude: [ 'createdAt', 'updatedAt']
+//       }
+//     }
+//   )
+//   res.json(users)
+
+// });
+
+router.post('/users', async (req, res, next) => {
   if (req.body.password) {
     //hashes password
     req.body.password = await bcryptjs.hashSync(req.body.password)
     //creates new user & validations for new user
+    console.log(req.body)
     await User.create(req.body)
     res.location('/')
     res.status(201).end()
@@ -90,12 +105,12 @@ router.post('/users', async (req, res) => {
 
 //*************** Coures Routes ********************* */
 
-router.get('/courses', async (req, res, ) => {
+router.get('/courses', async (req, res, next) => {
   const courses = await Courses.findAll({
-    
+
     // Excludes unneeded private information 
     attributes: {
-      exclude: ['password', 'createdAt', 'updatedAt']
+      exclude: ['createdAt', 'updatedAt']
     },
     include: [
       {
@@ -105,7 +120,7 @@ router.get('/courses', async (req, res, ) => {
     ],
   })
   res.json(courses)
-  });
+});
 
 router.get('/Courses/:id', async (req, res, next) => {
   try {
@@ -128,7 +143,8 @@ router.get('/Courses/:id', async (req, res, next) => {
       res.json(courseId)
     }
   } catch (err) {
-    console.log('500: Internal Server Error')
+    console.log('500: Internal Server Error');
+    next(err);
   }
 })
 
@@ -146,7 +162,8 @@ router.post('/Courses', authenticateUser, async (req, res, next) => {
 
   }
   catch (err) {
-    console.log('Status 500: Internal Server Error')
+    console.log('Status 500: Internal Server Error');
+    next(err);
   }
 })
 
@@ -155,7 +172,7 @@ router.post('/Courses', authenticateUser, async (req, res, next) => {
 router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
   try {
     const courseDelete = await Courses.findByPk(req.params.id)
-    if (courseDelete.userId === req.body.userId) {
+    if (courseDelete.userId === req.currentUser.id) {
       await courseDelete.destroy();
       res.status(204).end();
     } else {
@@ -163,7 +180,8 @@ router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
     };
   }
   catch (err) {
-    console.log("Forbidden: you are not the correct user")
+    console.log("Forbidden: you are not the correct user");
+    next(err);
   }
 })
 
@@ -171,7 +189,7 @@ router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
 router.put('/courses/:id', authenticateUser, async (req, res, next) => {
   try {
     const courseUpdate = await Courses.findByPk(req.params.id);
-    if (courseUpdate.userId === req.body.userId) {
+    if (courseUpdate.userId === req.currentUser.id) {
       if (req.body.title && req.body.description) {
         courseUpdate.update(req.body);
         res.status(204).end()
@@ -182,10 +200,27 @@ router.put('/courses/:id', authenticateUser, async (req, res, next) => {
     } else
       res.status(403).end();
   } catch (err) {
-    console.log("Error 500 - Internal Server Error- My bad yo")
+    console.log("Error 500 - Internal Server Error- My bad yo");
     next(err);
   }
-})
+});
+
+// send 404 if no other route matched
+router.use((req, res, next) => {
+  res.status(404).json({
+    message: 'Route Not Found',
+  });
+});
+
+// setup a global error handler
+router.use((err, req, res, next) => {
+
+  res.status(err.status || 500).json({
+    message: err.message,
+    error: {}
+  });
+});
+
 
 module.exports = router;
 
