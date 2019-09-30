@@ -90,16 +90,26 @@ router.get('/users', authenticateUser, (req, res, next) => {
 // });
 
 router.post('/users', async (req, res, next) => {
-  if (req.body.password) {
-    //hashes password
-    req.body.password = await bcryptjs.hashSync(req.body.password)
-    //creates new user & validations for new user
-    console.log(req.body)
-    await User.create(req.body)
-    res.location('/')
-    res.status(201).end()
-  } else {
-    res.status(400).end()
+  try {
+    if (req.body.password) {
+      //hashes password
+      req.body.password = bcryptjs.hashSync(req.body.password)
+      //creates new user & validations for new user
+      console.log(req.body)
+
+      let newUser = await User.create(req.body)
+      console.log(newUser)
+      res.location('/')
+      res.status(201).end()
+    } else {
+      res.status(400).end()
+    }
+  }
+  catch (error) {
+    console.log(error)
+    res.status(404).json({
+      message: error.errors,
+    });
   }
 })
 
@@ -157,13 +167,17 @@ router.post('/Courses', authenticateUser, async (req, res, next) => {
       res.location(`/api/course/${newCourse.id}`)
       res.status(201).end()
     } else {
-      res.status(400).end()
+      res.status(404).json({
+        message: 'User needs to provide a title and a description',
+      });
     }
 
   }
-  catch (err) {
-    console.log('Status 500: Internal Server Error');
-    next(err);
+  catch (error) {
+    console.log(error)
+    res.status(404).json({
+      message: error.errors,
+    });
   }
 })
 
@@ -189,19 +203,30 @@ router.delete("/courses/:id", authenticateUser, async (req, res, next) => {
 router.put('/courses/:id', authenticateUser, async (req, res, next) => {
   try {
     const courseUpdate = await Courses.findByPk(req.params.id);
+    if (courseUpdate === null) {
+      res.status(404).json({
+        message: 'Course does not exist'
+      });
+  }
     if (courseUpdate.userId === req.currentUser.id) {
       if (req.body.title && req.body.description) {
         courseUpdate.update(req.body);
         res.status(204).end()
       } else {
-        res.status(400).end();
+        res.status(400).json({
+          message: 'User needs to provide a title and a description',
+        });
       }
 
     } else
-      res.status(403).end();
-  } catch (err) {
-    console.log("Error 500 - Internal Server Error- My bad yo");
-    next(err);
+      res.status(401).json({
+        message: 'user not authorized to update this course',
+      });
+  } catch (error) {
+    console.log(error)
+    res.status(404).json({
+      message: error.errors,
+    });
   }
 });
 
