@@ -102,13 +102,15 @@ router.post('/users', async (req, res, next) => {
       res.location('/')
       res.status(201).end()
     } else {
-      res.status(400).end()
+      res.status(400).json({
+        message: 'User needs to provide to enter all necessary information to create a new account',
+      });
     }
   }
   catch (error) {
     console.log(error)
     res.status(404).json({
-      message: error.errors,
+      message: 'page not found',
     });
   }
 })
